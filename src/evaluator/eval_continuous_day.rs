@@ -27,7 +27,7 @@ impl Evaluator for ContinuousDayEvaluator {
     let customer_id = &request.customer.id;
     let now = &request.transaction.time;
     
-    let fds_status = get_fds_status(customer_id).await;
+    let fds_status = get_fds_status(&customer_id).await;
     
     if let Some(date) = fds_status.continuous_day_freepass_date {
       if date > *now {
@@ -39,7 +39,7 @@ impl Evaluator for ContinuousDayEvaluator {
       }
     }
     
-    let transactions = get_recent_transactions(customer_id, *now - Duration::days(1)).await;
+    let transactions = get_recent_transactions(&customer_id, *now - Duration::days(1)).await;
     
     let mut daily_totals: HashMap<String, i64> = HashMap::new();
     for tx in transactions {
@@ -47,11 +47,11 @@ impl Evaluator for ContinuousDayEvaluator {
       *daily_totals.entry(date_str).or_insert(0) += tx.amount;
     }
     
-    let valid_days = daily_totals.iter().filter(|(_, &amount)| amount >= 1000).count();
+    let valid_days = daily_totals.iter().filter(|&(_, &amount)| amount >= 1000).count();
     
     if valid_days == 5 {
-      deny_continuous_day_active(customer_id).await;
-      send_alert_to_rabbitmq(customer_id).await;
+      deny_continuous_day_active(&customer_id).await;
+      send_alert_to_rabbitmq(&customer_id).await;
       return FDSResponse {
         kind: EvaluateKind::Day,
         result: EvaluateResult::Deny,

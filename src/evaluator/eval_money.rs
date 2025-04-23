@@ -16,7 +16,7 @@ pub struct MoneyEvaluator;
 
 #[async_trait]
 impl Evaluator for MoneyEvaluator {
-  async fn evaluate(&self, request: FDSRequest) -> FDSResponse {
+  async fn evaluate(&self, request: &FDSRequest) -> FDSResponse {
     const LIMIT_KRW: i64 = 100_000_000;
     
     if request.transaction.amount > LIMIT_KRW {

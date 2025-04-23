@@ -22,7 +22,7 @@ pub struct FirstUsedEvaluator;
 
 #[async_trait]
 impl Evaluator for FirstUsedEvaluator {
-  async fn evaluate(&self,request: FDSRequest) -> FDSResponse {
+  async fn evaluate(&self,request: &FDSRequest) -> FDSResponse {
     let user_id = request.customer.id.clone();
     
     let mut status = get_fds_status(&user_id).await;

@@ -12,11 +12,11 @@ use crate::evaluator::model::{EvaluateKind, EvaluateResult, FDSRequest, FDSRespo
 
 //✅ 장기 미사용( 3개월간 로그인이 없었던 ) 자가 출금을 요청한 경우
 
-pub struct UnusedEvaluator;
+pub struct DormantAccountEvaluator;
 
 #[async_trait]
-impl Evaluator for UnusedEvaluator {
-  async fn evaluate(&self, _request: FDSRequest) -> FDSResponse {
+impl Evaluator for DormantAccountEvaluator {
+  async fn evaluate(&self, _request: &FDSRequest) -> FDSResponse {
     let usage_info = get_customer_usage_info(&_request.customer.id).await;
     
     let three_months_ago = Utc::now() - Duration::days(90);
@@ -26,13 +26,13 @@ impl Evaluator for UnusedEvaluator {
       notify_rabbitmq(&_request.customer.id, "3개월 이상 미사용 계정").await;
       
       FDSResponse {
-        kind: EvaluateKind::Unused,
+        kind: EvaluateKind::Dormant,
         result: EvaluateResult::Deny,
         report: "최근 3개월간 사용 내역 없음".into(),
       }
     } else {
       FDSResponse {
-        kind: EvaluateKind::Unused,
+        kind: EvaluateKind::Dormant,
         result: EvaluateResult::Pass,
         report: "최근 로그인 기록 확인됨".into(),
       }

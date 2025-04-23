@@ -15,7 +15,7 @@ pub struct TransactionTimeEvaluator;
 
 #[async_trait]
 impl Evaluator for TransactionTimeEvaluator {
-  async fn evaluate(&self, request: FDSRequest) -> FDSResponse {
+  async fn evaluate(&self, request: &FDSRequest) -> FDSResponse {
     let hour = request.transaction.time.hour();
     
     if (9..=17).contains(&hour) {

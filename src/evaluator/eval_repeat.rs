@@ -17,7 +17,7 @@ pub struct RepeatEvaluator;
 
 #[async_trait]
 impl Evaluator for RepeatEvaluator {
-  async fn evaluate(&self, request: FDSRequest) -> FDSResponse {
+  async fn evaluate(&self, request: &FDSRequest) -> FDSResponse {
     let now = Utc::now();
     
     let fds_status = get_fds_status(&request.customer.id).await;
@@ -69,7 +69,7 @@ pub struct FDSStatus {
   pub oneday_freepass_date: chrono::DateTime<Utc>,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct TransactionInfo {
   pub time: chrono::DateTime<Utc>,
   // ... other fields

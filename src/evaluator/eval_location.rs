@@ -7,6 +7,7 @@
 
 use async_trait::async_trait;
 use std::sync::Arc;
+use futures::FutureExt;
 use crate::evaluator::evaluator::Evaluator;
 use crate::evaluator::model::{EvaluateKind, EvaluateResult, FDSRequest, FDSResponse};
 
@@ -22,41 +23,23 @@ impl LocationEvaluator {
 
 #[async_trait]
 impl Evaluator for LocationEvaluator {
-  async fn evaluate(&self, request: FDSRequest) -> FDSResponse {
-    let result = std::panic::AssertUnwindSafe(async {
-      let is_foreign = !request.transaction.location.to_lowercase().contains("korea");
-      
-      if is_foreign {
-        update_location_active_deny(&request.customer.id).await;
-        notify_to_rabbitmq(&request.customer.id, "location mismatch").await;
-        self.log_message(&request.customer, &request.transaction.location, Self::LOCATION_FAILURE);
-        
-        FDSResponse {
-          kind: EvaluateKind::Location,
-          result: EvaluateResult::Deny,
-          report: Self::LOCATION_FAILURE.into(),
-        }
-      } else {
-        self.log_message(&request.customer, &request.transaction.location, Self::LOCATION_SUCCESS);
-        
-        FDSResponse {
-          kind: EvaluateKind::Location,
-          result: EvaluateResult::Pass,
-          report: Self::LOCATION_SUCCESS.into(),
-        }
-      }
-    })
-      .catch_unwind()
-      .await;
+  async fn evaluate(&self, request: &FDSRequest) -> FDSResponse {
+    let is_foreign = !request.transaction.location.to_lowercase().contains("korea");
     
-    match result {
-      Ok(resp) => resp,
-      Err(e) => {
-        FDSResponse {
-          kind: EvaluateKind::Location,
-          result: EvaluateResult::Exception,
-          report: format!("{:?}", e),
-        }
+    if is_foreign {
+      update_location_active_deny(&request.customer.id).await;
+      notify_to_rabbitmq(&request.customer.id, "location mismatch").await;
+      
+      FDSResponse {
+        kind: EvaluateKind::Location,
+        result: EvaluateResult::Deny,
+        report: Self::LOCATION_FAILURE.into(),
+      }
+    } else {
+      FDSResponse {
+        kind: EvaluateKind::Location,
+        result: EvaluateResult::Pass,
+        report: Self::LOCATION_SUCCESS.into(),
       }
     }
   }

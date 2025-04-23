@@ -15,7 +15,7 @@ pub struct IPEvaluator;
 
 #[async_trait]
 impl Evaluator for IPEvaluator {
-  async fn evaluate(&self, request: FDSRequest) -> FDSResponse {
+  async fn evaluate(&self, request: &FDSRequest) -> FDSResponse {
     if request.transaction.ip == request.transaction.ip {
       return FDSResponse {
         kind: EvaluateKind::Ip,

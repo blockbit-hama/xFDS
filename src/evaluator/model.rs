@@ -15,7 +15,7 @@ pub enum EvaluateKind {
   Money,
   Password,
   Profile,
-  Unused,
+  Dormant,
   TransactionTime,
 }
 
@@ -30,7 +30,7 @@ impl EvaluateKind {
       EvaluateKind::Money => "money related evaluation",
       EvaluateKind::Password => "password related evaluation",
       EvaluateKind::Profile => "profile related evaluation",
-      EvaluateKind::Unused => "unused long time related evaluation",
+      EvaluateKind::Dormant => "unused long time related evaluation",
       EvaluateKind::TransactionTime => "transaction time related evaluation",
     }
   }
@@ -53,13 +53,13 @@ pub struct FDSResponse {
 
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct CustomerInfo {
   pub id: String,
   pub name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct TransactionInfo {
   pub ip: String,
   pub location: String,
@@ -67,7 +67,7 @@ pub struct TransactionInfo {
   pub time: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct FDSRequest {
   pub customer: CustomerInfo,
   pub transaction: TransactionInfo,
